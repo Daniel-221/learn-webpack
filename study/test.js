@@ -548,7 +548,7 @@ function cps(...fncs) {
   } else {
     const f = fncs[0]
     const restF = fncs.slice(1)
-    return function(...args){
+    return function (...args) {
       const params = cps(restF)(...args)
       return f(params)
     }
@@ -632,28 +632,28 @@ class Promise {
     // 存放成功的回调
     this.onResolvedCallbacks = [];
     // 存放失败的回调
-    this.onRejectedCallbacks= [];
+    this.onRejectedCallbacks = [];
 
     let resolve = (value) => {
-      if(this.status ===  PENDING) {
+      if (this.status === PENDING) {
         this.status = FULFILLED;
         this.value = value;
         // 依次将对应的函数执行
-        this.onResolvedCallbacks.forEach(fn=>fn());
+        this.onResolvedCallbacks.forEach(fn => fn());
       }
-    } 
+    }
 
     let reject = (reason) => {
-      if(this.status ===  PENDING) {
+      if (this.status === PENDING) {
         this.status = REJECTED;
         this.reason = reason;
         // 依次将对应的函数执行
-        this.onRejectedCallbacks.forEach(fn=>fn());
+        this.onRejectedCallbacks.forEach(fn => fn());
       }
     }
 
     try {
-      executor(resolve,reject)
+      executor(resolve, reject)
     } catch (error) {
       reject(error)
     }
@@ -675,9 +675,45 @@ class Promise {
       });
 
       // 如果promise的状态是 pending，需要将 onFulfilled 和 onRejected 函数存放起来，等待状态确定后，再依次将对应的函数执行
-      this.onRejectedCallbacks.push(()=> {
+      this.onRejectedCallbacks.push(() => {
         onRejected(this.reason);
       })
     }
+  }
+}
+
+// 实现ajax
+
+
+// readyState 是 XMLHttpRequest 对象的一个属性，用于表示请求的当前状态。它有以下几个可能的值：
+// 0 (UNSENT): 请求未初始化，即尚未调用 open() 方法。
+// 1 (OPENED): 请求已建立连接，即已调用 open() 方法。
+// 2 (HEADERS_RECEIVED): 已接收响应头。
+// 3 (LOADING): 正在接收响应体。
+// 4 (DONE): 请求完成，响应数据接收完毕。
+// 在实际应用中，通常会在 readyState 为 4 时处理响应数据，因为此时请求已经完成，可以安全地访问响应数据。
+function promiseAjax(url) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('GET', url)
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          resolve(JSON.parse(xhr.responseText))
+        } else {
+          reject(new Error(xhr.statusText))
+        }
+      }
+    }
+    xhr.send()
+  })
+}
+
+async function AjaxFunc(url) {
+  try {
+    const res = await promiseAjax(url)
+    return res
+  } catch (e) {
+    console.log(e)
   }
 }
