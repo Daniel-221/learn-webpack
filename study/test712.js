@@ -151,3 +151,28 @@ var twoSum2 = function (nums, target) {
   }
   return []
 };
+
+
+// 全排列
+//给定一个不含重复数字的数组 nums ，返回其 所有可能的全排列 。你可以 按任意顺序 返回答案。
+/**
+ * @param {number[]} nums
+ * @return {number[][]}
+ */
+var permute = function (nums) {
+  const res = []
+  function loop(ns, curRes) {
+    if (ns.length === 0) {
+      res.push(curRes)
+    } else {
+      for (let i = 0; i < ns.length; i++) {
+        const newNums = ns.slice().splice(i, 1)
+        loop(newNums, curRes)
+      }
+    }
+  }
+  loop(nums)
+  return res
+};
+
+
