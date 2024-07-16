@@ -647,6 +647,7 @@ var mergeTwoLists = function (list1, list2) {
 
 // 螺旋矩阵
 // tag 考过 review
+// 不顺利 改来改去
 // 上下左右的加减关系 老是弄混了 比如想着是往下，往下那不减吗，应该是加！
 /**
  * @param {number[][]} matrix
@@ -696,6 +697,7 @@ var spiralOrder = function (matrix) {
  */
 
 // 子序列 是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。例如，[3,6,2,7] 是数组 [0,3,1,6,2,2,7] 的子序列
+// tag review  状态转移方程记一下
 
 var lengthOfLIS = function (nums) {
   // dp[i]表示以i位置结尾的最长递增子序列之长度
@@ -713,4 +715,429 @@ var lengthOfLIS = function (nums) {
     maxVal = Math.max(maxVal, dp[i])
   }
   return maxVal
+};
+
+//94. 二叉树的中序遍历
+
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number[]}
+ */
+// 递归
+var inorderTraversal = function (root) {
+  const res = []
+
+  function dfs(node) {
+    if (node) {
+      const { left, val, right } = node
+      left && dfs(left)
+      res.push(val)
+      right.push(right)
+    }
+  }
+  dfs(root)
+  return res
+};
+// 非递归的
+// var inorderTraversal2 = function (root) {
+//   const res = []
+
+//     const queue = []
+//     queue.unshift(root)
+//     while(queue.length){
+
+//     }
+// };
+
+// 二叉树的最大深度
+// 用的非递归
+
+/**
+ * @param {TreeNode} root
+ * @return {number}
+ */
+var maxDepth = function (root) {
+  if (!root) {
+    return 0
+  }
+  let queue = []
+  let res = 0
+  queue.push(root)
+  while (queue.length) {
+    res++
+    const newQueue = []
+    for (let i = 0; i < queue.length; i++) {
+      const { left, right } = queue[i]
+      left && newQueue.push(left)
+      right && newQueue.push(right)
+    }
+    queue = newQueue
+  }
+  return res
+};
+
+
+//岛屿的最大面积
+/**
+ * @param {number[][]} grid
+ * @return {number}
+ */
+
+// 输入：grid = [
+//   [0,0,1,0,0,0,0,1,0,0,0,0,0],
+//   [0,0,0,0,0,0,0,1,1,1,0,0,0],
+//   [0,1,1,0,1,0,0,0,0,0,0,0,0],
+//   [0,1,0,0,1,1,0,0,1,0,1,0,0],
+//   [0,1,0,0,1,1,0,0,1,1,1,0,0],
+//   [0,0,0,0,0,0,0,0,0,0,1,0,0],
+//   [0,0,0,0,0,0,0,1,1,1,0,0,0],
+//   [0,0,0,0,0,0,0,1,1,0,0,0,0]]
+// 输出：6
+// DFS&标记
+var maxAreaOfIsland = function (grid) {
+  const yLen = grid.length, xLen = grid[0].length
+  function markLand(grid, [y, x]) {
+    if (x >= 0 && y >= 0 && x < xLen && y < yLen && grid[y][x] === 1) {
+      //来过标记为2
+      grid[y][x] = 2
+      return (1 + markLand(grid, [y + 1, x])
+        + markLand(grid, [y, x + 1])
+        + markLand(grid, [y - 1, x])
+        + markLand(grid, [y, x - 1]))
+    } else {
+      return 0
+    }
+  }
+
+  let res = 0
+  for (let j = 0; j < yLen; j++) {
+    for (let i = 0; i < xLen; i++) {
+      if (grid[j][i] === 1) {
+        const area = markLand(grid, [j, i])
+        res = Math.max(res, area)
+      }
+    }
+  }
+  return res
+};
+
+
+
+//LRU缓存
+// 请你设计并实现一个满足  LRU (最近最少使用) 缓存 约束的数据结构。
+// 实现 LRUCache 类：
+// LRUCache(int capacity) 以 正整数 作为容量 capacity 初始化 LRU 缓存
+// int get(int key) 如果关键字 key 存在于缓存中，则返回关键字的值，否则返回 -1 。
+// void put(int key, int value) 如果关键字 key 已经存在，则变更其数据值 value ；如果不存在，则向缓存中插入该组 key-value 。如果插入操作导致关键字数量超过 capacity ，则应该 逐出 最久未使用的关键字。
+// 函数 get 和 put 必须以 O(1) 的平均时间复杂度运行。
+
+// tag review
+// 不顺利
+
+/**
+ * @param {number} capacity
+ */
+var LRUCache = function (capacity) {
+  this.cache = new Map()
+  this.capacity = capacity
+};
+
+/** 
+ * @param {number} key
+ * @return {number}
+ */
+LRUCache.prototype.get = function (key) {
+  const value = this.cache.get(key)
+  if (value !== undefined) {
+    // get后删掉注意
+    this.cache.delete(key)
+    this.cache.set(key, value)
+    return value
+  } else {
+    return -1
+  }
+};
+
+/** 
+ * @param {number} key 
+ * @param {number} value
+ * @return {void}
+ */
+LRUCache.prototype.put = function (key, value) {
+  if (!this.cache.has(key) && this.cache.size === this.capacity) {
+    // tip 迭代器用法 注意
+    this.cache.delete(this.cache.keys().next().value)
+  }
+  this.cache.delete(key)
+  this.cache.set(key, value)
+  console.log(key, value, this.cache)
+};
+
+
+// 零钱兑换
+// 给你一个整数数组 coins ，表示不同面额的硬币；以及一个整数 amount ，表示总金额。
+// 计算并返回可以凑成总金额所需的 最少的硬币个数 。如果没有任何一种硬币组合能组成总金额，返回 -1 。
+// 你可以认为每种硬币的数量是无限的。
+
+// 输入：coins = [1, 2, 5], amount = 11
+// 输出：3 
+// 解释：11 = 5 + 5 + 1
+// tag 思路
+// 顺利
+
+/**
+ * @param {number[]} coins
+ * @param {number} amount
+ * @return {number}
+ */
+var coinChange = function (coins, amount) {
+  // dp[i]表示i元最少硬币个数
+  const dp = new Array(amount + 1).fill(-1)
+  dp[0] = 0
+  for (let i = 1; i <= amount; i++) {
+    let minCost = Infinity
+    coins.forEach(coin => {
+      const index = i - coin
+      if (index >= 0 && dp[index] !== -1) {
+        minCost = Math.min(minCost, dp[index] + 1)
+      }
+    })
+    dp[i] = minCost === Infinity ? -1 : minCost
+  }
+  return dp[amount]
+};
+
+
+// 给定一个链表，删除链表的倒数第 n 个结点，并且返回链表的头结点。
+
+// tag 思路 快慢指针
+// 顺利 一遍过
+// 三年前 用map存的index到node的映射 好像也可以
+var removeNthFromEnd = function (head, n) {
+  if (head) {
+    let slow = head
+    let prev = null
+    let fast = slow
+    for (let i = 0; i < n; i++) {
+      fast = fast?.next
+    }
+    while (fast) {
+      fast = fast.next
+      prev = slow
+      slow = slow.next
+    }
+    console.log(prev, slow)
+
+    // 在对链表进行操作时，一种常用的技巧是添加一个哑节点（dummy node），它的 next 指针指向链表的头节点。这样一来，我们就不需要对头节点进行特殊的判断了。
+    // 这里还有这种操作 可以借鉴
+
+    if (slow === head) {
+      const newHead = slow.next
+      slow.next = null
+      return newHead
+    } else {
+      prev.next = slow.next
+      slow.next = null
+      return head
+    }
+  } else {
+    return head
+  }
+};
+
+
+//LCR 126. 斐波那契数
+/**
+ * @param {number} n
+ * @return {number}
+ */
+// 斐波那契数 （通常用 F(n) 表示）形成的序列称为 斐波那契数列 。该数列由 0 和 1 开始，后面的每一项数字都是前面两项数字的和。也就是：
+// F(0) = 0，F(1) = 1
+// F(n) = F(n - 1) + F(n - 2)，其中 n > 1
+
+// 递归 超时间 缓存也没用
+var fib = function (n) {
+  const map = new Map()
+  function fibFunc(n) {
+    if (n < 2) {
+      return n
+    } else {
+      if (map.has(n)) {
+        return map.get(n)
+      }
+      let res = fib(n - 1) + fib(n - 2)
+      map.set(n, res)
+      return res
+    }
+  }
+  const res = fibFunc(n)
+  console.log(map)
+  return res
+};
+// 动态规划 也不是要用数组
+// tag review
+var fib2 = function (n) {
+  if (n < 2) {
+    return n
+  }
+  let L1 = 1, L2 = 0
+  let cur = L1 + L2
+  for (let i = 2; i <= n; i++) {
+    // 题目要求的 他要取模 而且是每一步都取 不然最终会超精度 直接用最后结果取模会不准确
+    cur = (L1 + L2) % 1000000007
+    L2 = L1
+    L1 = cur
+  }
+  return cur
+};
+
+//翻转二叉树
+
+var mirrorTree = function (root) {
+  function dfs(node) {
+    if (node) {
+      [node.left, node.right] = [node.right, node.left]
+      node.left && dfs(node.left)
+      node.right && dfs(node.right)
+      return node
+    } else {
+      return node
+    }
+  }
+  return dfs(root)
+};
+
+//LCR 008. 长度最小的子数组
+// 给定一个含有 n 个正整数的数组和一个正整数 target 。
+// 找出该数组中满足其和 ≥ target 的长度最小的 连续子数组 [numsl, numsl+1, ..., numsr-1, numsr] ，并返回其长度。如果不存在符合条件的子数组，返回 0 。
+// 输入：target = 7, nums = [2,3,1,2,4,3]
+// [2, 5, 6, 8, 12, 15]
+// 输出：2
+
+
+
+// 方法一：前缀和 + 二分查找
+// tag review 这个题很容易想到暴力两层循环On方的方法，进一步可以用二分降低时间复杂度
+
+var minSubArrayLen = function (target, nums) {
+  //前缀和
+  // tag 前缀和 实际长度为len+1 通过在前面加一位 避免麻烦
+  const sums = [0]
+  for (let i = 0; i < nums.length; i++) {
+    sums[i + 1] = (sums[i]) + nums[i]
+  }
+  let res = Infinity
+  console.log('sums', sums)
+  for (let i = 0; i < sums.length; i++) {
+    //sums【ℹ】作为起点 二分查找终点
+    const t = target + sums[i]
+    const index = findJustLarger(sums, t)
+    console.log('findJustLarger', t, index)
+    if (index !== -1) {
+      console.log('refresh res', index - i)
+      res = Math.min(res, index - i)
+    }
+  }
+  return res === Infinity ? 0 : res
+};
+
+// 二分查找 刚好大于等于
+// tag review
+
+function findJustLarger(arr, target) {
+  const len = arr.length
+  // 通过更新res找到justlager
+  let res = -1
+
+  let left = 0, right = len - 1
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2)
+    const midValue = arr[mid]
+    if (midValue >= target) {
+      // 更新结果 但不急着返回 接着往左找
+      res = mid
+      right = mid - 1
+    } else {
+      left = mid + 1
+    }
+  }
+  return res
+}
+
+
+// 放法二 滑动窗口 两个指针startend从左到右 小于目标值end右移 大于目标值记录该值 并start右移
+// tag 这更好
+// 顺利
+var minSubArrayLen = function (target, nums) {
+  const len = nums.length
+  // left [ xx   xx  right]
+  //[子数组长度] = right-left 为了简便 初始值设为-1了
+  let left = -1, right = -1
+  let res = Infinity, curSum = 0
+
+  while (right < len) {
+    if (curSum >= target) {
+      res = Math.min(res, right - left)
+      left++
+      curSum -= nums?.[left] ?? 0
+    } else {
+      right++
+      curSum += nums[right]
+    }
+  }
+  return res === Infinity ? 0 : res
+}
+
+
+// 实现二分查找 等于某值
+function biSearch(arr, target, left, right) {
+  console.log(left, right)
+  if (left <= right) {
+    // tag注意这里 老是忘了加left
+    const pv = left + Math.floor((right - left) / 2)
+    //   let mid = Math.floor((left+right)/2)  奥  可以这么算的么
+    if (arr[pv] === target) {
+      return pv
+    } else if (arr[pv] > target) {
+      return biSearch(arr, target, left, pv - 1)
+    } else {
+      return biSearch(arr, target, pv + 1, right)
+    }
+  } else {
+    return -1
+  }
+}
+
+// ｜。。。｜--。。。-
+
+//接雨水
+//给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。
+var trap = function (height) {
+  let res = 0
+  let i = 0
+  while (i < height.length) {
+    const left = height[i]
+    let water = 0
+    let j = i + 1
+    for (j = i + 1; j < height.length; j++) {
+      const cur = height[j]
+      if (cur >= left) {
+        console.log(i, j, '   +   ', water)
+        res += water
+        break;
+      } else {
+        water += left - cur
+      }
+    }
+    i = j
+  }
+  return res
 };
