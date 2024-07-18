@@ -159,20 +159,129 @@ var twoSum2 = function (nums, target) {
  * @param {number[]} nums
  * @return {number[][]}
  */
+// 自己写的 递归 额外数组存储
 var permute = function (nums) {
   const res = []
   function loop(ns, curRes) {
+    console.log(ns, curRes)
     if (ns.length === 0) {
-      res.push(curRes)
+      res.push(curRes.slice())
     } else {
       for (let i = 0; i < ns.length; i++) {
-        const newNums = ns.slice().splice(i, 1)
+        curRes.push(ns[i])
+        const newNums = ns.slice(0)
+        newNums.splice(i, 1)
         loop(newNums, curRes)
+        curRes.pop()
       }
     }
   }
-  loop(nums)
+  loop(nums, [])
   return res
 };
 
 
+// 优化空间复杂度
+// 用nums原空间 左边是排好的，右边是待排的  123｜456   
+// 可视为全排列问题的一个公用思路
+// tag review
+var permute2 = function (nums) {
+  const res = []
+  // recursion完成对index位置 用右侧数字进行所有尝试
+  function recursion(nums, index) {
+      if (index === nums.length - 1) {
+          res.push(nums.slice())
+          return
+      }
+      for (let j = index; j < nums.length; j++) {
+          swap(nums, index, j)
+          recursion(nums, index + 1)
+          swap(nums, index, j)
+      }
+  }
+  function swap(nums, a, b) {
+      [nums[a], nums[b]] = [nums[b], nums[a]]
+  }
+  recursion(nums, 0)
+  return res
+};
+
+
+
+// 最大连续子数组的和
+// tag review 直接套公式
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+var maxSubArray = function (nums) {
+  if (nums.length === 1) {
+      return nums[0]
+  }
+  else {//动态规划 dp[i]表示以i为 终点 的最大连续数组和
+
+      const dp = []
+      dp[0] = nums[0]
+      let max = dp[0]
+      for (let i = 1; i < nums.length; i++) {
+          dp[i] = Math.max(nums[i], dp[i - 1] + nums[i])
+          max = Math.max(max, dp[i])
+      }
+      return max
+  }
+};
+// 空间优化 很简单
+/**
+ * 解法三：动态规划空间优化
+ * 思路：
+ *   我们注意到方法一的动态规划在状态转移的时候只用到了i一1的信息，没有使用整个数组的信息。
+ *   我们可以使用两个变量迭代来代替数组。
+ *   状态转移的时候更新变量y,该轮循环结束的再更新x为y即可做到每次迭代都是上一轮的dp。
+ *   遍历数组，每次只要比较取最大值即可。
+ * 时间复杂度：O(n)，遍历一遍。
+ * 空间复杂度：O(1)，常数变量
+ */
+function maxSubArray(nums: number[]): number {
+  const len = nums.length
+  if (len === 0) return 0
+  
+  let x = nums[0]
+  let y = 0
+  let maxSum = x
+
+  for (let i = 1; i < len; i++) {
+      y = Math.max(nums[i], x + nums[i])
+      maxSum = Math.max(maxSum, y)
+      x = y
+  }
+
+  return maxSum
+};
+
+
+
+// 二叉树层序遍历
+// 自己写的 比较啰嗦
+var levelOrder = function (root) {
+  if (root) {
+      let queue = [];
+      queue.push(root);
+      const res = [];
+      while (queue.length > 0) {
+          const newQueue = [];
+          const r = []
+          for (let i = 0; i < queue.length; i++) {
+              const cur = queue[i];
+              const { left, right, val } = cur;
+              r.push(val); 
+              if (left) newQueue.push(left);
+              if (right) newQueue.push(right);
+          }
+          res.push(r)
+          queue = newQueue; // 更新队列为下一层的节点  
+      }
+      return res;
+  } else {
+      return [];
+  }
+};
