@@ -2,7 +2,7 @@ import axios from 'axios';
 
 //创建axios石粒
 const http = axios.create({
-  baseUrl: 'http://127.0.0.1',
+  baseURL: 'http://127.0.0.1:3000',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' }
 })
