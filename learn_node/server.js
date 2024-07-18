@@ -73,6 +73,8 @@ app.listen(port, () => {
 // 原生服务示例
 // 引入 http 模块
 const http = require('http');
+// 在macOS上使用Node.js实现内网穿透，可以使用ngrok或localtunnel这样的服务
+const localtunnel = require('localtunnel');
 
 // 创建 HTTP 服务器
 const server = http.createServer((req, res) => {
@@ -87,7 +89,14 @@ const server = http.createServer((req, res) => {
   }
 });
 
-// 监听 3000 端口
-server.listen(3001, () => {
+const PORT = 3001;
+// 监听 3001 端口
+server.listen(PORT, () => {
   console.log('服务器运行在 http://localhost:3001/');
+  // 开启localtunnel
+  // 启动node服务 运行lt --port 3001
+  tunnels = localtunnel(PORT, (err, tunnel) => {
+    if (err) console.error(err);
+    else console.log(`Your public URL is: ${tunnel.url}`);
+  });
 });
