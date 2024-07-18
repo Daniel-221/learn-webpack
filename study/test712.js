@@ -1120,24 +1120,41 @@ function biSearch(arr, target, left, right) {
 
 //接雨水
 //给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。
-var trap = function (height) {
-  let res = 0
-  let i = 0
-  while (i < height.length) {
-    const left = height[i]
-    let water = 0
-    let j = i + 1
-    for (j = i + 1; j < height.length; j++) {
-      const cur = height[j]
-      if (cur >= left) {
-        console.log(i, j, '   +   ', water)
-        res += water
-        break;
-      } else {
-        water += left - cur
-      }
-    }
-    i = j
-  }
-  return res
-};
+// 我的失败代码:
+// var trap = function (height) {
+//   let res = 0
+//   let i = 0
+//   while (i < height.length) {
+//     const left = height[i]
+//     let water = 0
+//     let j = i + 1
+//     let hasWater = false
+
+//     for (j = i + 1; j < height.length; j++) {
+//       const cur = height[j]
+//       if (cur >= left) {
+//         console.log(i, j, '   +   ', water)
+//         res += water
+//         hasWater = true
+//         break;
+//       } else {
+//         water += left - cur
+//       }
+//     }
+//     if (hasWater) {
+//       i = j
+//     } else {
+//       i++
+//     }
+//   }
+//   console.log(i, height.length)
+//   return res
+// };
+
+// tag 就是个思路
+// 某一位置存水量取决于左右的最大高度
+// 遍历两边维护左右最大高度数组
+// curWater = min(leftMax,rightMax) - height[i]
+
+
+
