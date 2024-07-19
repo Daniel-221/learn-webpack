@@ -175,18 +175,18 @@ var permute2 = function (nums) {
   const res = []
   // recursion完成对index位置 用右侧数字进行所有尝试
   function recursion(nums, index) {
-      if (index === nums.length - 1) {
-          res.push(nums.slice())
-          return
-      }
-      for (let j = index; j < nums.length; j++) {
-          swap(nums, index, j)
-          recursion(nums, index + 1)
-          swap(nums, index, j)
-      }
+    if (index === nums.length - 1) {
+      res.push(nums.slice())
+      return
+    }
+    for (let j = index; j < nums.length; j++) {
+      swap(nums, index, j)
+      recursion(nums, index + 1)
+      swap(nums, index, j)
+    }
   }
   function swap(nums, a, b) {
-      [nums[a], nums[b]] = [nums[b], nums[a]]
+    [nums[a], nums[b]] = [nums[b], nums[a]]
   }
   recursion(nums, 0)
   return res
@@ -202,18 +202,18 @@ var permute2 = function (nums) {
  */
 var maxSubArray = function (nums) {
   if (nums.length === 1) {
-      return nums[0]
+    return nums[0]
   }
   else {//动态规划 dp[i]表示以i为 终点 的最大连续数组和
 
-      const dp = []
-      dp[0] = nums[0]
-      let max = dp[0]
-      for (let i = 1; i < nums.length; i++) {
-          dp[i] = Math.max(nums[i], dp[i - 1] + nums[i])
-          max = Math.max(max, dp[i])
-      }
-      return max
+    const dp = []
+    dp[0] = nums[0]
+    let max = dp[0]
+    for (let i = 1; i < nums.length; i++) {
+      dp[i] = Math.max(nums[i], dp[i - 1] + nums[i])
+      max = Math.max(max, dp[i])
+    }
+    return max
   }
 };
 // 空间优化 很简单
@@ -230,15 +230,15 @@ var maxSubArray = function (nums) {
 function maxSubArray(nums: number[]): number {
   const len = nums.length
   if (len === 0) return 0
-  
+
   let x = nums[0]
   let y = 0
   let maxSum = x
 
   for (let i = 1; i < len; i++) {
-      y = Math.max(nums[i], x + nums[i])
-      maxSum = Math.max(maxSum, y)
-      x = y
+    y = Math.max(nums[i], x + nums[i])
+    maxSum = Math.max(maxSum, y)
+    x = y
   }
 
   return maxSum
@@ -250,25 +250,25 @@ function maxSubArray(nums: number[]): number {
 // 自己写的 比较啰嗦
 var levelOrder = function (root) {
   if (root) {
-      let queue = [];
-      queue.push(root);
-      const res = [];
-      while (queue.length > 0) {
-          const newQueue = [];
-          const r = []
-          for (let i = 0; i < queue.length; i++) {
-              const cur = queue[i];
-              const { left, right, val } = cur;
-              r.push(val); 
-              if (left) newQueue.push(left);
-              if (right) newQueue.push(right);
-          }
-          res.push(r)
-          queue = newQueue; // 更新队列为下一层的节点  
+    let queue = [];
+    queue.push(root);
+    const res = [];
+    while (queue.length > 0) {
+      const newQueue = [];
+      const r = []
+      for (let i = 0; i < queue.length; i++) {
+        const cur = queue[i];
+        const { left, right, val } = cur;
+        r.push(val);
+        if (left) newQueue.push(left);
+        if (right) newQueue.push(right);
       }
-      return res;
+      res.push(r)
+      queue = newQueue; // 更新队列为下一层的节点  
+    }
+    return res;
   } else {
-      return [];
+    return [];
   }
 };
 
@@ -1291,4 +1291,48 @@ function biSearch(arr, target, left, right) {
 // curWater = min(leftMax,rightMax) - height[i]
 
 
+// 二叉树蛇形遍历
+class Node {
+  constructor(val) {
+    this.val = val
+    this.left = null
+    this.right = null
+  }
+}
+const root = new Node(1)
+const a = new Node(2)
+const b = new Node(3)
+const c = new Node(4)
+const d = new Node(5)
+root.left = a
+root.right = b
+b.left = c
+b.right = d
+
+function snakeTraverse(root) {
+  if (root) {
+    let queue = []
+    const res = []
+    queue.push(root)
+    let flag = true
+    while (queue.length > 0) {
+      const newQueue = []
+      const cur = []
+      for (let i = 0; i < queue.length; i++) {
+        const { val, left, right } = queue[i]
+        cur.push(val)
+        left && newQueue.push(left)
+        right && newQueue.push(right)
+      }
+      if (!flag) {
+        cur.reverse()
+      }
+      res.push(...cur)
+      queue = newQueue
+      flag = !flag
+    }
+    return res
+  }
+
+}
 
