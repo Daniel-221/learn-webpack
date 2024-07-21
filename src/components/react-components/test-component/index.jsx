@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import './index.css'
 import './index.less'
 import image from './assets/poi-pic.png'
+import Todolist from '../todo-list'
 
 import request from '../../../request/index'
 
@@ -28,6 +29,7 @@ export default class index extends Component {
         this is a react component
         <span className='red'>red</span>
         <img className='image' src={image} />
+        <Todolist />
       </div>
     )
   }
