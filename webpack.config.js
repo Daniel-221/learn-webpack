@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin")
+const TerserPlugin = require('terser-webpack-plugin')
 const path = require("path")
 module.exports = {
   // 指定构建模式，有两个参数可选
@@ -18,9 +19,18 @@ module.exports = {
     assetModuleFilename: 'images/[hash][ext][query]'
   },
   plugins: [
+    // HtmlWebpackPlugin 用于自动生成 HTML 文件，并自动注入打包后的 JavaScript 文件。
     new HtmlWebpackPlugin({
       template: './src/index.html'
-    })
+    }),
+    //  用于压缩 JavaScript 代码，减少文件大小。
+    // new TerserPlugin({
+    //   terserOptions: {
+    //     compress: {
+    //       // drop_console: true // 移除console语句
+    //     }
+    //   }
+    // })
   ],
   //sourceMap就是一个信息文件，里面存储这位置信息。也就是说， Source Map文件中存储着压缩混淆后的代码，所对应的转换前的位置。
   //保证运行时报错的行数与源代码的行数保持一致
