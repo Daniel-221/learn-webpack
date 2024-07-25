@@ -13,6 +13,7 @@ module.exports = {
     }
   },
   entry: "./src/index.js",
+  // entry: "./src/testHook.js", //learn hook
   output: {
     path: __dirname + '/dist',
     filename: 'main.js',

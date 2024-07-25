@@ -1,5 +1,7 @@
 .root-container {
-  width: 100%;
+  /* width: 100%;
+   */
+  width: 960px;
   height: 100px;
   background-color: aliceblue;
 }

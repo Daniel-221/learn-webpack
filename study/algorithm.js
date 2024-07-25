@@ -1336,3 +1336,22 @@ function snakeTraverse(root) {
 
 }
 
+// 帕瓦多数列
+// 第0项 ( P_0 ) = 0
+// 第1项 ( P_1 ) = 1
+// 从第2项开始，每一项都是前两项的和的两倍，即 ( P_n = 2P_{n-1} + P_{n-2} ) 对于 ( n \geq 2 )
+function powado(n) {
+  if (n < 2) {
+    return n
+  } else {
+    let n2 = 0, n1 = 1
+    let i = 2
+    let cur = 0
+    for (i = 2; i <= n; i++) {
+      cur = 2 * n1 + n2
+      n2 = n1
+      n1 = cur
+    }
+    return cur
+  }
+}

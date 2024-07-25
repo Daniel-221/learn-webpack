@@ -1,3 +1,6 @@
+// 常考手写题
+
+// 柯里化
 export function curry(func) {
   return function curried(...args) {
     if (args.length >= func.length) {
@@ -6,7 +9,6 @@ export function curry(func) {
     return function (...args2) {
       return curried.apply(this, args.concat(args2));
     };
-
   }
 }
 
@@ -27,6 +29,7 @@ export function curry(func) {
 //   }
 // }
 
+// 手写delay
 const delay(func, time){
   return function (...args) {
     setTimeout(() => {
@@ -163,7 +166,7 @@ export class LRU {
 
 }
 
-
+// 数组打平
 function arrFlat(arr) {
   const newArr = []
   for (let i = 0; i < arr.length; i++) {
@@ -175,6 +178,47 @@ function arrFlat(arr) {
     }
   }
   return newArr
+}
+// 非递归 用栈
+function arrFlat2(arr) {
+  const stack = [...arr]
+  const newArr = []
+  while (stack.length) {
+    const item = stack.pop()
+    if (Array.isArray(item)) {
+      stack.push(...item)
+    } else {
+      newArr.push(item)
+    }
+  }
+  return newArr.reverse()
+}
+
+// 防抖
+function dbc(func, time) {
+  let timer = null
+  return function (...args) {
+    clearInterval(timer)
+    timer = setTimeout(() => {
+      func.apply(this, ...args)
+      timer = null
+    }, time);
+  }
+}
+
+
+// 节流
+function reduceliu(func, time) {
+  let timer = null
+  return function (...args) {
+    if (timer) {
+      return
+    }
+    timer = setTimeout(() => {
+      func.call(this, args)
+      timer = null
+    }, time);
+  }
 }
 
 
@@ -286,8 +330,9 @@ const obj = {
   c: 3
 }
 
-
+// tag review
 function flatObj(obj, prefix = '', result = {}) {
+  //用 (let k in obj)  统一处理数组和对象
   for (let k in obj) {
     const curKey =
       Array.isArray(obj) ?
@@ -303,7 +348,18 @@ function flatObj(obj, prefix = '', result = {}) {
   return result
 }
 
-
+// function flt(obj, prefix = '', result = {}) {
+//   for (let k in obj) {
+//     const curItem = obj[k]
+//     const curPrefix = prefix + (Array.isArray(obj) ? `[${k}]` : (prefix?`.`:'') +`${k}`)
+//     if (typeof curItem === 'object') {
+//       flt(curItem, curPrefix, result)
+//     } else {
+//       result[curPrefix] = curItem
+//     }
+//   }
+//   return result
+// }
 
 
 
@@ -717,3 +773,98 @@ async function AjaxFunc(url) {
     console.log(e)
   }
 }
+
+
+// get_user_id 转 驼峰表达式
+function toCamel(s) {
+  return s.replace(/_([a-z]+)/g, (ss, p1) => {
+    return p1[0].toUpperCase() + p1.substring(1)
+  })
+}
+
+//手写一个类Person，要求有私有属性，公共方法，静态方法，用function Person(){}实现，不能用class
+function Person(name) {
+  // 私有变量 闭包实现
+  let _name = name
+  // 公共方法
+  this.getName = function () {
+    return _name
+  }
+  this.setName = function (name) {
+    _name = name
+  }
+}
+// 静态方法 直接附加在构造函数上的，可通过Person直接访问
+Person.createPerson = function (name) {
+  return new Person(name)
+}
+// 用class实现
+class PersonClass {
+  // 私有属性
+  // 私有属性 #name 和 #age 是通过ES6的私有字段语法来实现的，只能在类内部访问
+  #name;
+  #age;
+
+  // 构造函数
+  constructor(name, age) {
+    this.#name = name;
+    this.#age = age;
+  }
+
+  // 公共方法
+  getName() {
+    return this.#name;
+  }
+
+  getAge() {
+    return this.#age;
+  }
+
+  setName(name) {
+    this.#name = name;
+  }
+
+  setAge(age) {
+    this.#age = age;
+  }
+
+  // 静态方法
+  static createPerson(name, age) {
+    return new Person(name, age);
+  }
+}
+
+function asyncLimit(promiseExctors, limit) {
+  let index = 0
+  const len = promiseExctors.length
+  let settled = 0
+  const results = new Array(len).fill(null)
+
+  return new Promise((resolve, reject) => {
+    function runTask(index) {
+      if (index >= len) {
+        return
+      }
+      const exc = promiseExctors[index]
+      Promise.resolve(exc()).then(res => {
+        results[index] = res
+        settled++
+        if (settled === len) {
+          resolve(results)
+        } else {
+          runTask(index + 1)
+        }
+      })
+    }
+    for (let i = 0; i < limit; i++) {
+      runTask(i)
+    }
+  })
+}
+const tasks = [
+  () => {
+    return fetch('xxx')
+  }, () => {
+    return fetch('xxx')
+  },
+]
