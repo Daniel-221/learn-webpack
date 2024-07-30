@@ -46,7 +46,7 @@ http.interceptors.response.use(
 )
 
 // 封装请求方法
-const request = {
+const request = { 
   get(url, params) {
     return http.get(url, { params })
   },

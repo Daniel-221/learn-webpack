@@ -377,6 +377,18 @@ function formatCaculate(str = '') {
 formatCaculate(str)
 
 
+
+
+
+ '11+2-3*4+5/2*4+10/5'
+
+ function solution(str){
+  return str.replace(/([0-9]+([\*\/][0-9]+)+)/g,(s,p)=>{
+    return `(${s})`
+  })
+ }
+
+
 // 【编程题】基于二面中的表达式包裹编程题，实现计算表达式的值
 // function caculate(str) {
 //   const exp = /\d+([\*\/]\d+)+/g
@@ -555,7 +567,7 @@ class Lazy {
 }
 
 
-
+// 并发控制
 function limit(promises, l) {
 
   const len = promises.length
