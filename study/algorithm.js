@@ -1372,3 +1372,60 @@ function findPeakElement(arr) {
   }
   return left
 }
+
+
+const first = () =>
+  new Promise((resolve, reject) => {
+    console.log(3)
+    let p = new Promise((resolve, reject) => {
+      console.log(7)
+      setTimeout(() => {
+        console.log(5)
+        resolve(6)
+      }, 0)
+      resolve(1)
+    })
+    resolve(2)
+    p.then((arg) => {
+      console.log(arg)
+    })
+  })
+first().then((arg) => {
+  console.log(arg)
+})
+console.log(4)
+
+// 3  7  4  1  2  5
+
+
+//最长公共子串
+// const str1 = "abcdef";
+// const str2 = "zabcf";
+// tag review
+// 二维动态规划
+// dp[i][j]表示以str1[i]和str2[j]结尾的最长公共子串长度
+function findLongestCommonSubsting(str1, str2) {
+  const len1 = str1.length, len2 = str2.length
+  const dp = new Array(len1)
+  let res = 0
+  for (let i = 0; i < len1; i++) {
+    dp[i] = new Array(len2).fill(0)
+  }
+  for (let i = 0; i < len1; i++) {
+    dp[i][0] = str1[i] === str2[0] ? 1 : 0
+    res = Math.max(res, dp[i][0])
+  }
+  for (let j = 0; j < len2; j++) {
+    dp[0][j] = str2[j] === str1[0] ? 1 : 0
+    res = Math.max(res, dp[0][j])
+  }
+
+  for (let i = 1; i < len1; i++) {
+    for (let j = 1; j < len2; j++) {
+      dp[i][j] = str1[i] === str2[j] ? dp[i - 1][j - 1] + 1 : 0
+      res = Math.max(res, dp[i][j])
+    }
+  }
+  console.log(dp)
+  return res
+}

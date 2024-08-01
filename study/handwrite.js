@@ -380,13 +380,13 @@ formatCaculate(str)
 
 
 
- '11+2-3*4+5/2*4+10/5'
+'11+2-3*4+5/2*4+10/5'
 
- function solution(str){
-  return str.replace(/([0-9]+([\*\/][0-9]+)+)/g,(s,p)=>{
+function solution(str) {
+  return str.replace(/([0-9]+([\*\/][0-9]+)+)/g, (s, p) => {
     return `(${s})`
   })
- }
+}
 
 
 // 【编程题】基于二面中的表达式包裹编程题，实现计算表达式的值
@@ -880,3 +880,88 @@ const tasks = [
     return fetch('xxx')
   },
 ]
+
+// 字节考过我
+//实现远程加法
+//https://blog.csdn.net/github_37715294/article/details/121517033
+
+const remoteAdd = async (a, b) => new Promise(resolve => {
+  setTimeout(() => resolve(a + b), 1000);
+});
+
+// 请实现本地的localAdd方法，调用remoteAdd，能最优的实现输入数字的加法
+// 这个是
+// 虽然这个实现可以正确地计算结果，但由于每次累加操作都是串行执行的，因此总的等待时间是所有 remoteAdd 操作的时间之和。为了进一步优化，可以考虑并行处理多个加法操作。
+
+// function localAdd(...inputs) {
+
+//   let sum = inputs.reduce(async (pre, cur) => {
+//     let preV = 0
+//     let val = 0
+//     if (typeof pre === 'object') {
+//       await pre.then(res => {
+//         preV = res
+//       })
+//     } else {
+//       preV = pre
+//     }
+//     await remoteAdd(preV, cur).then(res => {
+//       val = res
+//     })
+//     return val
+//   })
+//   return new Promise(resolve => {
+//     resolve(sum)
+//   })
+// }
+
+function localAdd(...inputs) {
+  return new Promise((resolve) => {
+    const temp = []
+    const tasks = []
+
+    let activeTaskNum = 0
+    let i = 0
+    while (i < inputs.length) {
+      if (i + 1 < inputs.length) {
+        runAdd(inputs[i], inputs[i + 1])
+        i += 2
+      } else {
+        console.log(temp, inputs[i])
+        temp.push(inputs[i])
+        i += 1
+      }
+
+    }
+
+    function runAdd(a, b) {
+      const p = remoteAdd(a, b)
+      activeTaskNum++
+      tasks.push(p)
+      p.then(res => {
+        temp.push(res)
+        activeTaskNum--
+        if (temp.length > 1) {
+          const a = temp.pop()
+          const b = temp.pop()
+          runAdd(a, b)
+        }
+        if (activeTaskNum === 0) {
+          resolve(temp[0])
+        }
+      })
+    }
+  })
+}
+
+
+// 请用示例验证运行结果:
+localAdd(1, 2)
+  .then(result => {
+    console.log(result); // 3
+  });
+
+localAdd(3, 5, 2)
+  .then(result => {
+    console.log(result); // 10
+  });
