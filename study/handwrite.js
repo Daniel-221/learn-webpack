@@ -692,7 +692,7 @@ const PENDING = 'PENDING';
 const FULFILLED = 'FULFILLED';
 const REJECTED = 'REJECTED';
 
-class Promise {
+class myPromise {
   constructor(executor) {
     this.status = PENDING;
     this.value = undefined;
@@ -814,6 +814,7 @@ Person.createPerson = function (name) {
 class PersonClass {
   // 私有属性
   // 私有属性 #name 和 #age 是通过ES6的私有字段语法来实现的，只能在类内部访问
+  // ES2022 才有的私有字段
   #name;
   #age;
 
@@ -965,3 +966,332 @@ localAdd(3, 5, 2)
   .then(result => {
     console.log(result); // 10
   });
+
+
+
+
+// 手写reduce
+function ArrayReduce(arr, func, initValue) {
+  if (Array.isArray(arr)) {
+    let value = initValue
+    arr.forEach((item, index) => {
+      value = func(value, item, index)
+    })
+    return value
+  } else {
+    throw new Error('Type Error')
+  }
+}
+
+// 改进后 支持没有初始值
+
+function ArrayReduce(arr, func, initValue) {
+  if (!Array.isArray(arr)) {
+    throw new TypeError('First argument must be an array');
+  }
+
+  if (typeof func !== 'function') {
+    throw new TypeError('Second argument must be a function');
+  }
+
+  let hasInitValue = arguments.length > 2;
+  let value = hasInitValue ? initValue : arr[0];
+  let startIndex = hasInitValue ? 0 : 1;
+
+  for (let i = startIndex; i < arr.length; i++) {
+    value = func(value, arr[i], i, arr);
+  }
+
+  return value;
+}
+
+
+// 数组转树
+// const arr = [
+//   {
+//     id: 2,
+//     name: '部门B',
+//     parentId: 0
+//   },
+//   {
+//     id: 3,
+//     name: '部门C',
+//     parentId: 1
+//   },
+//   {
+//     id: 1,
+//     name: '部门A',
+//     parentId: 2
+//   },
+//   {
+//     id: 4,
+//     name: '部门D',
+//     parentId: 1
+//   },
+//   {
+//     id: 5,
+//     name: '部门E',
+//     parentId: 2
+//   },
+//   {
+//     id: 6,
+//     name: '部门F',
+//     parentId: 3
+//   },
+//   {
+//     id: 7,
+//     name: '部门G',
+//     parentId: 2
+//   },
+//   {
+//     id: 8,
+//     name: '部门H',
+//     parentId: 4
+//   }
+// ]
+
+// 自己写的
+function foo(arr) {
+  const map = new Map()
+  arr.forEach((item, index) => {
+    const { id } = item
+    item.children = []
+    map.set(id, item)
+  })
+
+  let root = null
+  arr.forEach((item, index) => {
+    const { parentId } = item
+    parent = map.get(parentId)
+    if (parent) {
+      parent.children.push(item)
+    } else {
+      root = item
+    }
+  })
+  return root
+}
+// 参考代码
+const foo2 = (list) => {
+  const map = {}
+  // tag 可用数组存根节点 因未必只有一个
+  const treeList = []
+
+  list.forEach(item => {
+    if (!item.children) item.children = [];
+    map[item.id] = item
+  });
+
+  list.forEach(item => {
+    const parent = map[item.parentId];
+    if (parent) {
+      parent.children.push(item);
+    } else {
+      treeList.push(item);
+    }
+  });
+
+  return treeList;
+}
+
+
+
+// 手写filter/map/every
+// 不写了
+
+// 手写柯里化
+function curry(func) {
+  return function curried(...args) {
+    if (args.length >= func.length) {
+      return func.apply(this, args)
+    } else {
+      return function (...args2) {
+        return curried.apply(this, args.concat(args2))
+      }
+    }
+  }
+}
+
+
+// 参考
+const curry2 = (fn, ...args) => {
+  if (args.length < fn.length) {
+    // 未接受完参数，拼上参数
+    return (..._args) => curry(fn, ...args, ..._args)
+  } else {
+    // 接受完所有参数，直接执行
+    return fn(...args)
+  }
+}
+
+
+// 手写eventEmitter
+class EventEmitter {
+
+
+  constructor() {
+    this.tasks = {}
+  }
+
+  on(event, cb) {
+    if (!this.tasks[event]) {
+      this.tasks[event] = []
+    }
+    this.tasks[event].push(cb)
+  }
+  off(event, cb) {
+    const curEventTasks = this.tasks[event]
+    if (curEventTasks) {
+      if (cb) {
+        const index = curEventTasks.findIndex(c => c === cb)
+        if (index !== -1) {
+          curEventTasks.splice(index, 1)
+        }
+      } else {
+        delete this.tasks[event]
+      }
+    }
+  }
+  emit(event) {
+    const curTasks = this.tasks[event]
+    curTasks.forEach(t => {
+      t()
+    })
+  }
+}
+
+// 参考
+class EventEmitter {
+  constructor() {
+    this.events = {};
+  }
+
+  on(eventName, listener) {
+    if (!this.events[eventName]) {
+      this.events[eventName] = [];
+    }
+    this.events[eventName].push(listener);
+  }
+
+  emit(eventName, ...args) {
+    const listeners = this.events[eventName];
+    if (listeners) {
+      listeners.forEach(listener => listener(...args));
+    }
+  }
+
+  off(eventName, listener) {
+    const listeners = this.events[eventName];
+    if (listeners) {
+      this.events[eventName] = listeners.filter(l => l !== listener);
+    }
+  }
+
+  // tag once 就是搞一个新事件，调用老的 完了再取消 奥
+  once(eventName, listener) {
+    const wrapper = (...args) => {
+      listener(...args);
+      this.off(eventName, wrapper);
+    };
+    this.on(eventName, wrapper);
+  }
+}
+
+
+//  手写instanceOf
+function myInstanceOf(left, right) {
+  if (typeof left !== 'object' || typeof right !== 'object') {
+    throw new Error('type Error')
+  }
+  const cur = left
+  const target = right.prototype
+  while (cur) {
+    if (cur === target) {
+      return true
+    } else {
+      cur = cur.__proto__
+    }
+  }
+  return false
+}
+
+// 参考
+function myInstanceOf2(obj, constructor) {
+  // 加上异常处理
+  if (!['object', 'function'].includes(typeof obj) || obj === null) return false;// 非有效对象\函数
+
+  // tag 访问对象的原型 可以用这个奥
+  let proto = Object.getPrototypeOf(obj);
+
+  while (proto !== null) {
+    if (proto === constructor.prototype) {
+      return true;
+    }
+    proto = Object.getPrototypeOf(proto);
+  }
+
+  return false;
+}
+
+
+// 手写Object.create
+function myObjectCreate(src) {
+  if (!['object', 'function'].includes(typeof src)) {
+    throw new Error('Type Error')
+  }
+  const newObj = {}
+  // 注意 setPrototypeOf第二个参数 直接传目标对象，而不是其原型
+  Object.setPrototypeOf(newObj, src);
+  return newObj
+}
+
+// 参考 有点意思
+function createObject(prototype) {
+  function Temp() { } // 创建一个空的构造函数
+
+  Temp.prototype = prototype; // 将原型对象赋值给构造函数的原型
+
+  return new Temp(); // 使用构造函数创建一个新对象
+}
+
+
+// 对象扁平化
+function flatObj2(obj, prefix = '', newObj = {}) {
+  for (let k in obj) {
+    const newkey = prefix + (Array.isArray(obj) ? `[${k}]` : ((prefix ? '.' : '') + `${k}`))
+    const value = obj[k]
+    if (typeof value === 'object') {
+      if (Array.isArray(value)) {
+        flatObj2(value, newkey, newObj)
+      } else {
+        flatObj2(value, newkey, newObj)
+      }
+    } else {
+      newObj[newkey] = value
+    }
+  }
+  return newObj
+}
+
+//cankao
+const flattern = (obj) => {
+  const res = {};
+
+  const dfs = (curr, path) => {
+    if(typeof curr === 'object' && curr !== null) {
+      const isArray = Array.isArray(curr);
+      for(let key in curr) {
+        const newPath = path ? isArray ? `${path}[${key}]` : `${path}.${key}` : key;
+        dfs(curr[key], newPath);
+      }
+    } else {
+      res[path] = curr
+    }
+  }
+  dfs(obj);
+  return res;
+}
+
+
+//大厂面试每日一题
+// https://q.shanyue.tech/roadmap/code#sleepdelay-
