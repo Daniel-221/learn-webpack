@@ -1278,9 +1278,9 @@ const flattern = (obj) => {
   const res = {};
 
   const dfs = (curr, path) => {
-    if(typeof curr === 'object' && curr !== null) {
+    if (typeof curr === 'object' && curr !== null) {
       const isArray = Array.isArray(curr);
-      for(let key in curr) {
+      for (let key in curr) {
         const newPath = path ? isArray ? `${path}[${key}]` : `${path}.${key}` : key;
         dfs(curr[key], newPath);
       }
@@ -1295,3 +1295,16 @@ const flattern = (obj) => {
 
 //大厂面试每日一题
 // https://q.shanyue.tech/roadmap/code#sleepdelay-
+
+
+// 数组扁平化
+function arrFlat(arr) {
+  arr.reduce((res, cur) => {
+    return res.concat(Array.isArray(cur) ? arrFlat(cur) : cur)
+  }, [])
+}
+// 参考 注意有第二参数depth
+function flatten (list, depth = 1) {
+  if (depth === 0) return list
+  return list.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b, depth - 1) : b), [])
+}
