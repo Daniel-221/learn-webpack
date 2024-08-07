@@ -1429,3 +1429,617 @@ function findLongestCommonSubsting(str1, str2) {
   console.log(dp)
   return res
 }
+
+
+// 最长重复子数组
+// 跟上个题一样的
+// 给两个整数数组 nums1 和 nums2 ，返回 两个数组中 公共的 、长度最长的子数组的长度 。
+// 示例 1：
+// 输入：nums1 = [1,2,3,2,1], nums2 = [3,2,1,4,7]
+// 输出：3
+
+var findLength = function (nums1, nums2) {
+  const len1 = nums1.length, len2 = nums2.length
+  let maxCommonSubArrLen = 0
+  const dp = new Array(len1).fill(null).map(item => new Array(len2).fill(0))
+  // dp[i][j] 表示以nums1[i]和nums2[j]结尾的最长重复子数组长度
+  // 初始化第一列
+  for (let i = 0; i < len1; i++) {
+    dp[i][0] = nums1[i] === nums2[0] ? 1 : 0
+    maxCommonSubArrLen = Math.max(maxCommonSubArrLen, dp[i][0])
+  }
+  // 初始化第一行
+  for (let j = 1; j < len2; j++) {
+    dp[0][j] = nums2[j] === nums1[0] ? 1 : 0
+    maxCommonSubArrLen = Math.max(maxCommonSubArrLen, dp[0][j])
+  }
+  for (let i = 1; i < len1; i++) {
+    for (let j = 1; j < len2; j++) {
+      dp[i][j] = nums1[i] === nums2[j] ? dp[i - 1][j - 1] + 1 : 0
+      maxCommonSubArrLen = Math.max(maxCommonSubArrLen, dp[i][j])
+    }
+  }
+  return maxCommonSubArrLen
+
+};
+
+
+// 二叉树的前序遍历
+
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number[]}
+ */
+var preorderTraversal = function (root) {
+  if (!root) {
+    return []
+  }
+  let stack = []
+  const res = []
+  stack.push(root)
+  while (stack.length > 0) {
+    const curNode = stack.pop()
+    res.push(curNode.val)
+    curNode.right && stack.push(curNode.right)
+    curNode.left && stack.push(curNode.left)
+  }
+  return res
+};
+
+
+// 074合并区间
+// 以数组 intervals 表示若干个区间的集合，其中单个区间为 intervals[i] = [starti, endi] 。请你合并所有重叠的区间，并返回一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间。
+
+// 示例 1：
+
+// 输入：intervals = [[1,3],[2,6],[8,10],[15,18]]
+// 输出：[[1,6],[8,10],[15,18]]
+// 解释：区间 [1,3] 和 [2,6] 重叠, 将它们合并为 [1,6].
+// 示例 2：
+
+// 输入：intervals = [[1,4],[4,5]]
+// 输出：[[1,5]]
+// 解释：区间 [1,4] 和 [4,5] 可被视为重叠区间。
+
+
+
+var merge = function (intervals) {
+  const merged = []
+  intervals.sort((a, b) => a[0] - b[0])
+  for (let i = 0; i < intervals.length; i++) {
+    const cur = intervals[i]
+    if (merged.length > 0) {
+      let last = merged[merged.length - 1]
+      if (last[1] >= cur[0]) {
+        last[1] = Math.max(cur[1], last[1])
+      } else {
+        merged.push(cur)
+      }
+    } else {
+      merged.push(cur)
+    }
+  }
+  return merged
+};
+
+
+// 二叉树的锯齿形层序遍历
+// 给你二叉树的根节点 root ，返回其节点值的 锯齿形层序遍历 。（即先从左往右，再从右往左进行下一层遍历，以此类推，层与层之间交替进行）。
+var zigzagLevelOrder = function (root) {
+  if (!root) {
+    return []
+  }
+  const res = []
+  let queue = []
+  queue.push(root)
+  let reverse = false
+  while (queue.length > 0) {
+    const curLevel = []
+    const newQueue = []
+    for (let i = 0; i < queue.length; i++) {
+      const curNode = queue[i]
+      const { left, right, val } = curNode
+      curLevel.push(val)
+      left && newQueue.push(left)
+      right && newQueue.push(right)
+    }
+    queue = newQueue
+    res.push(reverse ? curLevel.reverse() : curLevel)
+    reverse = !reverse
+  }
+  return res
+};
+
+
+// 从前序与中序遍历序列构造二叉树
+// 给定两个整数数组 preorder 和 inorder ，其中 preorder 是二叉树的先序遍历， inorder 是同一棵树的中序遍历，请构造二叉树并返回其根节点。
+
+
+// 输入: preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]
+// 输出: [3,9,20,null,null,15,7]
+
+// 可通过传数组及左右下标进一步优化空间复杂度
+var buildTree = function (preorder, inorder) {
+  const traverse = (preo, ino) => {
+    if (preo.length > 0) {
+      const rootVal = preo[0]
+      const rootIndex = ino.findIndex(item => item === rootVal)
+      // console.log(rootVal, 'rootIndex', rootIndex)
+      const leftInorder = ino.slice(0, rootIndex)
+      const rightInorder = ino.slice(rootIndex + 1)
+      const leftSize = leftInorder.length
+      const leftPreOrder = preo.slice(1, 1 + leftSize)
+      const rightPreOrder = preo.slice(1 + leftSize)
+      const leftTree = traverse(leftPreOrder, leftInorder)
+      const rightTree = traverse(rightPreOrder, rightInorder)
+      // console.log(leftPreOrder, leftInorder)
+      // console.log(rightPreOrder, rightInorder)
+      return {
+        val: rootVal,
+        left: leftTree,
+        right: rightTree
+      }
+
+    } else {
+      return null
+    }
+  }
+  return traverse(preorder, inorder)
+};
+
+
+// LCR 098. 不同路径
+// 中等
+// 相关标签
+// 相关企业
+// 一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为 “Start” ）。
+
+// 机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为 “Finish” ）。
+
+// 问总共有多少条不同的路径？
+// 000
+// 000
+
+var uniquePaths = function (m, n) {
+  if (m > 0 && n > 0) {
+    // dp[i][j] 表示左上角到对应坐标的路径数
+    const dp = new Array(m).fill(null).map(i => new Array(n).fill(0))
+    dp[0][0] = 1
+    for (let i = 1; i < m; i++) {
+      dp[i][0] = 1
+    }
+    for (let j = 1; j < n; j++) {
+      dp[0][j] = 1
+    }
+    for (let i = 1; i < m; i++) {
+      for (let j = 1; j < n; j++) {
+        dp[i][j] = dp[i - 1][j] + dp[i][j - 1]
+      }
+    }
+    return dp[m - 1][n - 1]
+  } else {
+    return 0
+  }
+
+};
+
+
+
+// LCR 127. 跳跃训练
+
+// 今天的有氧运动训练内容是在一个长条形的平台上跳跃。平台有 num 个小格子，每次可以选择跳 一个格子 或者 两个格子。请返回在训练过程中，学员们共有多少种不同的跳跃方式。
+// 结果可能过大，因此结果需要取模 1e9+7（1000000007），如计算初始结果为：1000000008，请返回 1。
+// 可以用两个指针优化掉数组空间
+var trainWays = function (num) {
+  // dp[i]表示i个格子的方式数
+  const dp = new Array(num + 1).fill(0)
+  dp[0] = 1
+  dp[1] = 1
+  for (let i = 2; i < num + 1; i++) {
+    const n = dp[i - 1] + dp[i - 2]
+    dp[i] = n % 1000000007
+  }
+  return dp[num]
+};
+
+
+
+
+// 384. 打乱数组
+
+// 给你一个整数数组 nums ，设计算法来打乱一个没有重复元素的数组。打乱后，数组的所有排列应该是 等可能 的。
+// 实现 Solution class:
+
+// Solution(int[] nums) 使用整数数组 nums 初始化对象
+// int[] reset() 重设数组到它的初始状态并返回
+// int[] shuffle() 返回数组随机打乱后的结果
+
+/**
+ * @param {number[]} nums
+ */
+var Solution = function (nums) {
+  this.origalNums = nums
+};
+
+/**
+ * @return {number[]}
+ */
+Solution.prototype.reset = function () {
+  return this.origalNums
+};
+
+/**
+ * @return {number[]}
+ */
+Solution.prototype.shuffle = function () {
+  const nums = this.origalNums.map((item, index) => ({ value: item, index }))
+  const len = nums.length
+  const weights = new Array(len).fill(0).map(item => Math.random())
+  return nums.sort((a, b) => (weights[a.index] - weights[b.index])).map(item => item.value)
+};
+
+
+
+
+// 相交链表
+// tag 双指针 有点意思
+//A： 1 2 3
+//B： 4 5 6 7 8
+// ----
+// 1 2 3 7 8 4 5 6 7 8
+// 4 5 6 7 8 1 2 3 7 8
+//                 ⬆️最后会在此相会  m+n
+
+var getIntersectionNode = function (headA, headB) {
+  let pA = headA, pB = headB
+  while (pA !== pB) {
+    pA = pA ? pA.next : headB
+    pB = pB ? pB.next : headA
+  }
+  return pA
+};
+
+
+
+
+// 旋转图像
+// ：matrix = [
+// [1,2,3],
+// [4,5,6],
+// [7,8,9]]
+// // 输出：
+// [[7,4,1],
+// [8,5,2],
+// [9,6,3]]
+// 推导个关系的事 可四个角同时交换优化空间复杂度
+var rotate = function (matrix) {
+  // 正方形的 长宽都一样
+  const len = matrix.length
+  // 洋葱 从外往里 且只需一半
+  for (let i = 0; i < Math.floor(len / 2); i++) {
+    for (let j = i; j < len - 1 - i; j++) {
+      // 同时交换四个角
+      // tag i、j、len-1-i、len-1-j在每个位置都有出现 
+      [matrix[i][j], matrix[j][len - 1 - i], matrix[len - 1 - i][len - 1 - j], matrix[len - 1 - j][i]] =
+        [matrix[len - 1 - j][i], matrix[i][j], matrix[j][len - 1 - i], matrix[len - 1 - i][len - 1 - j]]
+    }
+  }
+  return matrix
+};
+
+
+
+// 给定一个只包含数字的字符串 s ，用以表示一个 IP 地址，返回所有可能从 s 获得的 有效 IP 地址 。你可以按任何顺序返回答案。
+// 有效 IP 地址 正好由四个整数（每个整数位于 0 到 255 之间组成，且不能含有前导 0），整数之间用 '.' 分隔。
+// 例如："0.1.2.201" 和 "192.168.1.1" 是 有效 IP 地址，但是 "0.011.255.245"、"192.168.1.312" 和 "192.168@1.1" 是 无效 IP 地址。
+// 输入：s = "25525511135"
+// 输出：["255.255.11.135", "255.255.111.35"]
+var restoreIpAddresses = function (s) {
+  function checkIsValid(str) {
+    const number = Number(str)
+    if (!isNaN(number)) {
+      if (number.toString().length === str.length) {
+        if (number >= 0 && number <= 255) {
+          return true
+        } else {
+          return false
+        }
+      } else {
+        return false
+      }
+    } else {
+      return false
+    }
+  }
+
+  const result = []
+  function traverse(str, curIp = []) {
+    console.log(str, curIp)
+    if (curIp.length >= 4) {
+      if (str === '') {
+        result.push(curIp.join('.'))
+      }
+      return
+    }
+    for (let i = 1; i <= Math.min(3, str.length); i++) {
+      const cur = str.slice(0, i)
+      if (checkIsValid(cur)) {
+        const rest = str.slice(i)
+        traverse(rest, [...curIp, cur])
+      }
+    }
+  }
+  traverse(s)
+  return result
+};
+
+
+// 破冰游戏/ 剩下的数字
+// 社团共有 num 位成员参与破冰游戏，编号为 0 ~ num-1。成员们按照编号顺序围绕圆桌而坐。社长抽取一个数字 target，从 0 号成员起开始计数，排在第 target 位的成员离开圆桌，且成员离开后从下一个成员开始计数。请返回游戏结束时最后一位成员的编号。
+// 模拟 超时了
+var iceBreakingGame = function (num, target) {
+  const nums = new Array(num).fill(null).map((item, index) => index)
+  let cur = 0
+  while (nums.length > 1) {
+    const len = nums.length
+    cur = (cur + target - 1) % len
+    nums.splice(cur, 1)
+    cur = cur % (nums.length)
+    console.log(nums)
+  }
+  return nums[0]
+};
+
+
+// 递归 下面俩没懂
+var lastRemaining = function (n, m) {
+  if (n === 1) return 0; //只有一个数的时候那就是下标为0的地方
+  return (lastRemaining(n - 1, m) + m) % n;
+};
+
+// 数学方法（动态规划）
+var lastRemaining = function (n, m) {
+  let ans = 0;
+  for (let i = 2; i <= n; i++) {
+    ans = (ans + m) % i;
+  }
+  return ans;
+};
+
+
+// K个一组翻转链表
+// 给你链表的头节点 head ，每 k 个节点一组进行翻转，请你返回修改后的链表。
+// k 是一个正整数，它的值小于或等于链表的长度。如果节点总数不是 k 的整数倍，那么请将最后剩余的节点保持原有顺序。
+// 你不能只是单纯的改变节点内部的值，而是需要实际进行节点交换。
+
+
+// 输入：head = [1,2,3,4,5], k = 2
+// 输出：[2,1,4,3,5]
+// 困难 但其实没有复杂的逻辑，就是把细节写明白
+
+var reverseKGroup = function (head, k) {
+
+  // 对给定起止节点进行翻转，返回反转后的起止点
+  function reversePart(start, end) {
+    let cur = start
+    let prev = null
+    end.next = null
+    while (cur) {
+      const next = cur.next
+      cur.next = prev
+      prev = cur
+      cur = next
+    }
+    return [end, start]
+  }
+
+  let cur = head, count = 0
+  // 记录要反转的起止点
+  let start = head, end = null
+  // 记录链表的上一个接入点，用来接入翻转后的链表
+  let link = null
+  while (cur) {
+    count++
+    if (count === 1) {
+      start = cur
+      cur = cur.next
+    }
+    else if (count === k) {
+      count = 0
+      end = cur
+      const next = cur.next
+      const [newStart, newEnd] = reversePart(start, end)
+      if (link) {
+        link.next = newStart
+        newEnd.next = next
+      } else {
+        head = newStart
+        newEnd.next = next
+      }
+      link = newEnd
+      cur = next
+    } else {
+      cur = cur.next
+    }
+  }
+  return head
+
+};
+
+
+
+// 二叉树
+// 给定一个二叉树的 根节点 root，想象自己站在它的右侧，按照从顶部到底部的顺序，返回从右侧所能看到的节点值。
+
+var rightSideView = function (root) {
+  if (root) {
+
+    let queue = []
+    const res = []
+    queue.push(root)
+    while (queue.length) {
+      let rightV = null
+      const newQueue = []
+      for (let i = 0; i < queue.length; i++) {
+        const { val, left, right } = queue[i]
+        rightV = val
+        left && newQueue.push(left)
+        right && newQueue.push(right)
+      }
+      res.push(rightV)
+      queue = newQueue
+    }
+    return res
+  } else {
+    return []
+  }
+};
+
+
+// 最小栈
+// 请你设计一个 最小栈 。它提供 push ，pop ，top 操作，并能在常数时间内检索到最小元素的栈。
+
+
+/**
+ * initialize your data structure here.
+ */
+var MinStack = function () {
+  this.stack = []
+  this.minStack = []
+};
+
+/** 
+ * @param {number} x
+ * @return {void}
+ */
+MinStack.prototype.push = function (x) {
+  this.stack.push(x)
+  const curmin = this.minStack?.[this.minStack.length - 1] ?? Infinity
+  this.minStack.push(Math.min(curmin, x))
+};
+
+/**
+ * @return {void}
+ */
+MinStack.prototype.pop = function () {
+  this.minStack.pop()
+  return this.stack.pop()
+};
+
+/**
+ * @return {number}
+ */
+MinStack.prototype.top = function () {
+  return this.stack[this.stack.length - 1]
+};
+
+/**
+ * @return {number}
+ */
+MinStack.prototype.getMin = function () {
+  return this.minStack[this.minStack.length - 1]
+};
+
+
+// LCR 089. 打家劫舍
+
+// 一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响小偷偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。
+// 给定一个代表每个房屋存放金额的非负整数数组 nums ，请计算 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额。
+
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+var rob = function (nums) {
+  // dp[i]表示偷到i房子的最大金额
+  const n = nums.length
+  const dp = new Array(n).fill(0)
+  dp[0] = nums[0]
+  for (let i = 1; i < n; i++) {
+    dp[i] = Math.max(nums[i] + (dp?.[i - 2] ?? 0), dp[i - 1])
+  }
+  return dp[n - 1]
+};
+
+
+// LCR 025. 两数相加 II
+
+// 给定两个 非空链表 l1和 l2 来代表两个非负整数。数字最高位位于链表开始位置。它们的每个节点只存储一位数字。将这两数相加会返回一个新的链表。
+// 可以假设除了数字 0 之外，这两个数字都不会以零开头。
+
+// 用栈把数收集相加 再构成链表
+// 方案二 反转链表再相加
+var addTwumberoNs = function (l1, l2) {
+
+  function makeLinkList(arr) {
+    let head = null
+    let last = null
+    arr.forEach(item => {
+      const newNode = {
+        val: item,
+        next: null
+      }
+      if (head) {
+        last.next = newNode
+        last = newNode
+      } else {
+        head = last = newNode
+      }
+    })
+    return head
+  }
+
+  let p1 = l1, p2 = l2
+  const nums1 = [], nums2 = []
+  while (p1) {
+    nums1.push(p1.val)
+    p1 = p1.next
+  }
+  while (p2) {
+    nums2.push(p2.val)
+    p2 = p2.next
+  }
+
+  // 我用的数组倒序遍历 其实可以用栈 但是看起来差不多
+
+  let index1 = nums1.length - 1, index2 = nums2.length - 1
+  const sum = []
+  let plus = 0
+  while (index1 >= 0 || index2 >= 0 || plus) {
+    const s = (nums1?.[index1--] ?? 0) + (nums2?.[index2--] ?? 0) + plus
+    plus = Math.floor(s / 10)
+    sum.unshift(s % 10)
+  }
+  const head = makeLinkList(sum)
+  return head
+};
+
+
+
+// 283. 移动零
+
+// 给定一个数组 nums，编写一个函数将所有 0 移动到数组的末尾，同时保持非零元素的相对顺序。
+// 请注意 ，必须在不复制数组的情况下原地对数组进行操作。
+// 输入: nums = [0,1,0,3,12]
+// 输出: [1,3,12,0,0]
+
+// tag review 双指针 
+var moveZeroes = function (nums) {
+  let left = 0 //left记录下一个非0元素该放的位置
+  for (let right = 0; right < nums.length; right++) {
+    // 挨个把非0元素放在数组左边，left指向空位
+    if (nums[right] !== 0) {
+      [nums[left], nums[right]] = [nums[right], nums[left]];
+      left++
+    }
+  }
+  return nums
+};
