@@ -1304,7 +1304,128 @@ function arrFlat(arr) {
   }, [])
 }
 // 参考 注意有第二参数depth
-function flatten (list, depth = 1) {
+function flatten(list, depth = 1) {
   if (depth === 0) return list
   return list.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b, depth - 1) : b), [])
 }
+
+
+
+// 实现异步缓冲队列
+function asyncQueue(fn, limit) {
+  const tasks = [];
+  let runTaskNum = 0;
+
+  function runTask({ id, resolve }) {
+    runTaskNum++;
+    fn(id).then(res => {
+      resolve(res);
+      runTaskNum--;
+      if (tasks.length > 0) {
+        const next = tasks.shift();
+        runTask(next);
+      }
+    });
+  }
+
+  return (id) => {
+    return new Promise(resolve => {
+      if (runTaskNum < limit) {
+        runTask({ id, resolve });
+      } else {
+        tasks.push({ id, resolve });
+      }
+    });
+  };
+}
+
+// 示例异步函数
+const asyncTask = (id) => new Promise((resolve) => {
+  setTimeout(() => {
+    console.log(`Task ${id} completed`);
+    resolve(`Result of task ${id}`);
+  }, 1000);
+});
+
+// 创建一个带有并发限制的异步队列
+const limitedQueue = asyncQueue(asyncTask, 2);
+
+// 添加任务到队列
+limitedQueue(1).then(console.log);
+limitedQueue(2).then(console.log);
+limitedQueue(3).then(console.log);
+limitedQueue(4).then(console.log);
+limitedQueue(5).then(console.log);
+
+
+class AsyncQueue {
+  constructor(limit) {
+    this.limit = limit;
+    this.tasks = [];
+    this.runTaskNum = 0;
+  }
+
+  runTask(fn, resolve) {
+    this.runTaskNum++;
+    Promise.resolve(fn()).then(res => {
+      resolve(res);
+      this.runTaskNum--;
+      if (this.tasks.length) {
+        const next = this.tasks.shift();
+        this.runTask(next.fn, next.resolve);
+      }
+    });
+  }
+
+  addTask(fn) {
+    return new Promise(resolve => {
+      if (this.runTaskNum < this.limit) {
+        this.runTask(fn, resolve);
+      } else {
+        this.tasks.push({ fn, resolve });
+      }
+    });
+  }
+}
+// 题目：实现一个带有并发限制的异步任务调度器
+// 题目描述
+// 请你实现一个 Scheduler 类，用于管理和调度异步任务。该类需要满足以下要求：
+// 并发限制：能够限制同时运行的最大任务数量。
+// 任务调度：按照任务添加的顺序依次调度任务。
+// 任务执行：每个任务是一个返回 Promise 的函数，任务执行完毕后，调度器应继续调度下一个任务。
+
+class Scheduler {
+  constructor(limit) {
+    // 初始化代码
+  }
+
+  // 添加任务到调度器
+  add(task) {
+    // 实现代码
+  }
+
+  // 运行任务
+  run() {
+    // 实现代码
+  }
+}
+
+// 示例异步任务
+const asyncTask = (time, id) => () => new Promise((resolve) => {
+  setTimeout(() => {
+    console.log(`Task ${id} completed`);
+    resolve(`Result of task ${id}`);
+  }, time);
+});
+
+// 创建一个带有并发限制的调度器
+const scheduler = new Scheduler(2);
+
+// 添加任务到调度器
+scheduler.add(asyncTask(1000, 1));
+scheduler.add(asyncTask(500, 2));
+scheduler.add(asyncTask(300, 3));
+scheduler.add(asyncTask(400, 4));
+
+// 运行调度器
+scheduler.run();
