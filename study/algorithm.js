@@ -2043,3 +2043,232 @@ var moveZeroes = function (nums) {
   }
   return nums
 };
+
+
+// 删除链表的倒数第 N 个结点
+var removeNthFromEnd = function (head, n) {
+  if (head) {
+    let fast = head, slow = head, slowPre = null
+    let index = 0
+    while (fast && index < n) {
+      fast = fast.next
+      index++
+    }
+
+    while (fast) {
+      fast = fast.next
+      slowPre = slow
+      slow = slow.next
+
+    }
+    if (slow === head) {
+      return slow.next
+    } else {
+      slowPre.next = slow.next
+      return head
+    }
+
+  } else {
+    return head
+  }
+}
+
+// 最长公共前缀
+// 输入：strs = ["flower","flow","flight"]
+// 输出："fl"
+var longestCommonPrefix = function (strs) {
+  let i = 0
+  const firstStr = strs[0]
+  res = ''
+  for (let i = 0; i < firstStr.length; i++) {
+    const ref = firstStr[i]
+    if (strs.slice(1).every(str => str?.[i] === ref)) {
+      res += ref
+    } else {
+      break
+    }
+  }
+  return res
+};
+
+
+// 字符串相乘
+// 给定两个以字符串形式表示的非负整数 num1 和 num2，返回 num1 和 num2 的乘积，它们的乘积也表示为字符串形式。
+// 注意：不能使用任何内置的 BigInteger 库或直接将输入转换为整数。
+// 输入: num1 = "2", num2 = "3"
+// 输出: "6"
+
+//模拟竖式
+//     123
+// x   456
+// ——————————
+//     738
+//    615
+//   492
+// ——————————
+//   56088
+
+
+// 借用上面大数相加
+// var addStrings = function (num1, num2) {
+
+// };
+/**
+ * 
+ * @param {*} num1 字符串的数
+ * @param {*} num2  字符串的数 但只可1位
+ * @returns 
+ */
+function mutiplyStrings(num1, num2, zero) {
+  if (num1 === '0' || num2 === '0') {
+    return '0'
+  }
+  let plus = 0
+  let i = num1.length - 1
+  const n2 = parseInt(num2)
+  const res = []
+  while (i >= 0) {
+    const n1 = parseInt(num1[i--])
+    const r = n1 * n2 + plus
+    plus = Math.floor(r / 10)
+    res.push(r % 10)
+  }
+  if (plus) {
+    res.push(plus)
+  }
+  return res.reverse().concat(new Array(zero).fill(0)).join('')
+}
+
+var multiply = function (num1, num2) {
+  const divideMutiplyRes = []
+  const arr2 = num2.split('').reverse()
+
+  arr2.forEach((n2, index) => {
+    divideMutiplyRes.push(mutiplyStrings(num1, n2, index))
+  })
+  // console.log(divideMutiplyRes)
+  const res = divideMutiplyRes.reduce((sum, item) => addStrings(sum, item), 0)
+  return res
+};
+
+
+// 230. 二叉搜索树中第K小的元素
+// 给定一个二叉搜索树的根节点 root ，和一个整数 k ，请你设计一个算法查找其中第 k 小的元素（从 1 开始计数）。
+
+/**
+ * @param {TreeNode} root
+ * @param {number} k
+ * @return {number}
+ */
+
+// 二叉搜索树 中序遍历为有序数组 按升序遍历即可
+// tag review
+
+var kthSmallest = function (root, k) {
+  let res = null, index = 0
+  function dfs(node) {
+    if (res) {
+      return
+    }
+    if (node) {
+      const { val, left, right } = node
+      left && dfs(left)
+      index++
+      if (index === k) {
+        res = val
+        return
+      }
+      right && dfs(right)
+    }
+  }
+  dfs(root)
+  return res
+};
+
+
+// 给定一个包含非负整数的 m x n 网格 grid ，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。
+// 说明：一个机器人每次只能向下或者向右移动一步。
+
+// 示例 1：
+// 输入：grid = [
+// [1,3,1],
+// [1,5,1],
+// [4,2,1]
+// ]
+// 输出：7
+var minPathSum = function (grid) {
+  // dp[i][j]表示左上角到该位置 路径总和最小值
+  const yLen = grid.length, xLen = grid[0].length
+  const dp = new Array(yLen).fill(null).map(item => new Array(xLen))
+
+  dp[0][0] = grid[0][0]
+
+  for (let i = 1; i < yLen; i++) {
+    dp[i][0] = grid[i][0] + dp[i - 1][0]
+  }
+
+  for (let j = 1; j < xLen; j++) {
+    dp[0][j] = grid[0][j] + dp[0][j - 1]
+  }
+
+  for (let i = 1; i < yLen; i++) {
+    for (let j = 1; j < xLen; j++) {
+      dp[i][j] = grid[i][j] + Math.min(dp[i - 1][j], dp[i][j - 1])
+    }
+  }
+
+  return dp[yLen - 1][xLen - 1]
+
+};
+
+
+
+// 阿拉伯数字转中文
+//1 2345 6789
+//一亿两千三百四十五万六千七百八十九
+function arabToChinese(number) {
+  const suffixs = ['', '十', '百', '千']
+  const level = ['', '万', '亿']
+  const numbers = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
+
+  // 四位数 （万以下） 转成汉字
+  function trans(number) {
+    let res = ''
+    const str = number.toString()
+    let index = str.length - 1
+    for (let i = 0; i < str.length; i++) {
+      const item = str[i]
+      if (item === '0' && i === str.length - 1) {
+        index--
+        continue
+      }
+      else if (str[i - 1] === '0' && item === '0') {
+        index--
+        continue
+      } else {
+        res += numbers[item] + (item === '0' ? '' : suffixs[index])
+        index--
+      }
+    }
+    if(res[res.length-1] === '零'){
+      res = res.substring(0,res.length-1)
+    }
+    return res
+  }
+
+  let result = ''
+  let l = 0
+  // 四位一级 循环处理
+  while (number) {
+    const cur = number % 10000
+    result = trans(cur) + level[l] + result
+    if (l < 2) {
+      l++
+    } else {
+      // 到亿之后万亿来回切
+      l = 1
+    }
+    number = Math.floor(number / 10000)
+  }
+  return result
+}
