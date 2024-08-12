@@ -195,7 +195,7 @@ var permute2 = function (nums) {
 
 
 // 最大连续子数组的和
-// tag review 直接套公式
+// tag review 直接套公式 动态规划 考过
 /**
  * @param {number[]} nums
  * @return {number}
@@ -358,8 +358,8 @@ var threeSum = function (nums) {
       continue;
     }
     const target = 0 - nums[i]
-    // 转为两数之和
-    let j = i + 1, k = nums.length - 1
+    // 转为两数之和  且是有序数组里两数之和  用的双指针
+    let j = i + 1, k = nums.length - 1 
     while (j < k) {
       // jk也需跳过重复元素
       // (j > i + 1 j和i可以重复 理解不了debug的时候发现也行
@@ -487,8 +487,8 @@ var sortArray2 = function (nums) {
           l++; r--
         }
       }
-      // while中止 无非l==r或者l<r  
-      // l<r就是两个指针都跑超了，此时r的位置是一个小于pivot的值，正好拿来和数组第一个位置的pivot换，而下面操作是把l === r的情况也统一用此操作处理
+      // while中止 无非l==r或者l>r  
+      // l>r就是两个指针都跑超了，此时r的位置是一个小于pivot的值，正好拿来和数组第一个位置的pivot换，而下面操作是把l === r的情况也统一用此操作处理
       if (l === r && arr[r] > pivot) {
         r--
       }
