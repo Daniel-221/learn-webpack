@@ -1387,45 +1387,109 @@ class AsyncQueue {
     });
   }
 }
-// 题目：实现一个带有并发限制的异步任务调度器
-// 题目描述
-// 请你实现一个 Scheduler 类，用于管理和调度异步任务。该类需要满足以下要求：
-// 并发限制：能够限制同时运行的最大任务数量。
-// 任务调度：按照任务添加的顺序依次调度任务。
-// 任务执行：每个任务是一个返回 Promise 的函数，任务执行完毕后，调度器应继续调度下一个任务。
 
-class Scheduler {
+
+class PriorityScheduler {
   constructor(limit) {
     // 初始化代码
+    this.limit = limit;
+    this.tasks = [];
+    this.runTaskNum = 0;
   }
 
   // 添加任务到调度器
-  add(task) {
+  add(task, priority) {
     // 实现代码
+    return new Promise(resolve => {
+      this.tasks.push({ task, priority, resolve });
+    });
   }
 
   // 运行任务
   run() {
-    // 实现代码
+    const runtask = () => {
+      // 实现代码
+      const { task, resolve } = this.tasks.pop()
+      this.runTaskNum++;
+      Promise.resolve(task()).then(res => {
+        resolve(res);
+        this.runTaskNum--;
+        if (this.tasks.length) {
+          runTask()
+        }
+      });
+    }
+
+    this.tasks.sort((a, b) => a.priority - b.priority)
+    for (let i = 0; i < this.limit && i < this.tasks.length; i++) {
+      runtask()
+    }
   }
 }
 
-// 示例异步任务
-const asyncTask = (time, id) => () => new Promise((resolve) => {
-  setTimeout(() => {
-    console.log(`Task ${id} completed`);
-    resolve(`Result of task ${id}`);
-  }, time);
-});
 
-// 创建一个带有并发限制的调度器
-const scheduler = new Scheduler(2);
+// ：实现一个函数来查找数组中的所有重复元素
+function findDuplicates(arr) {
+  const set = new Set()
+  const res = new Set()
+  arr.forEach(item => {
+    if (set.has(item)) {
+      res.add(item)
+    } else {
+      set.add(item)
+    }
+  })
+  return Array.from(res)
+}
 
-// 添加任务到调度器
-scheduler.add(asyncTask(1000, 1));
-scheduler.add(asyncTask(500, 2));
-scheduler.add(asyncTask(300, 3));
-scheduler.add(asyncTask(400, 4));
 
-// 运行调度器
-scheduler.run();
+function batchProcessTasks(tasks, size) {
+  const result = []
+  let i = 0
+  return new Promise((resolve) => {
+    function runBatchTask() {
+      if (i < tasks.length) {
+        console.log(i)
+        const nextBatch = tasks.slice(i, i + size)
+        i = i + size
+        Promise.all(nextBatch.map(fn => Promise.resolve(fn()))).then(res => {
+          result.push(res)
+          runBatchTask()
+        })
+      } else {
+        resolve(result)
+      }
+    }
+    runBatchTask()
+  })
+}
+
+
+class AsyncScheduler {
+  constructor(limit) {
+    this.limit = limit
+    this.curRunning = 0
+    this.tasks = []
+  }
+
+  runTask({ fn, resolve }) {
+    this.curRunning++
+    Promise.resolve(fn()).then(res => {
+      resolve(res)
+      this.curRunning--
+      if(this.tasks.length){
+
+      }
+    })
+  }
+  add(fn) {
+    return new Promise(resolve => {
+      if (this.curRunning < this.limit) {
+        this.runTask({fn,resolve})
+      } else {
+        this.tasks.push({fn,resolve})
+      }
+    })
+
+  }
+}
