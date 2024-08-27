@@ -1477,19 +1477,53 @@ class AsyncScheduler {
     Promise.resolve(fn()).then(res => {
       resolve(res)
       this.curRunning--
-      if(this.tasks.length){
-
+      if (this.tasks.length) {
+        const next = this.tasks.shift()
+        this.runTask(next)
       }
     })
   }
   add(fn) {
     return new Promise(resolve => {
       if (this.curRunning < this.limit) {
-        this.runTask({fn,resolve})
+        this.runTask({ fn, resolve })
       } else {
-        this.tasks.push({fn,resolve})
+        this.tasks.push({ fn, resolve })
       }
     })
-
   }
 }
+
+
+function lengthOfLongestSubstring(str) {
+  let left = 0, right = 0
+  let longest = 0
+  const map = new Map()
+  for (right = 0; right < str.length; right++) {
+    if (map.has(str[right])) {
+      left = map.get(str[right]) + 1
+    }
+    map.set(str[right], right)
+    longest = Math.max(right - left + 1, longest)
+
+  }
+  return longest
+}
+
+
+
+class Singleton {
+  constructor() {
+    if (Singleton.instance) {
+      return Singleton.instance
+    }
+    Singleton.instance = this
+  }
+  static getInstance() {
+    if (!Singleton.instance) {
+      Singleton.instance = new Singleton()
+    }
+    return Singleton.instance
+  }
+}
+
